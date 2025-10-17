@@ -25,6 +25,21 @@ set_exception_handler(function($exception) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+// Load configuration first (before WordPress)
+$config = file_exists(__DIR__ . '/config.php') ? require __DIR__ . '/config.php' : [];
+
+// Initialize authentication (before WordPress loads)
+use InstaWP\MCP\PHP\Auth\BearerTokenAuth;
+$bearerToken = $config['bearer_token'] ?? null;
+$auth = new BearerTokenAuth($bearerToken);
+
+// Validate authentication
+$authResult = $auth->validate();
+if (!$authResult['authenticated']) {
+    $auth->sendUnauthorizedResponse($authResult['error'], $authResult['headers']);
+    exit;
+}
+
 // Load WordPress using centralized loader
 // This reads config.php and loads WordPress from the configured path
 require_once __DIR__ . '/load-wordpress.php';
@@ -96,11 +111,16 @@ $creator = new ServerRequestCreator($psr17Factory, $psr17Factory, $psr17Factory,
 // Get the incoming request
 $request = $creator->fromGlobals();
 
+// Build server info description with capabilities
+$capabilities = [
+    'safe_mode' => defined('WP_MCP_SAFE_MODE') ? WP_MCP_SAFE_MODE : false,
+    'authentication_enabled' => $auth->isEnabled()
+];
+$description = 'WordPress MCP Server - Capabilities: ' . json_encode($capabilities);
+
 // Create the MCP server
 $serverBuilder = Server::builder()
-    ->setServerInfo('WordPress MCP Server', '1.0.0', [
-        'safe_mode' => defined('WP_MCP_SAFE_MODE') ? WP_MCP_SAFE_MODE : false
-    ])
+    ->setServerInfo('WordPress MCP Server', '1.0.0', $description)
     ->setSession(new FileSessionStore(__DIR__ . '/sessions'));
 
 // Register all tools with dynamic parameter handling

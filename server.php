@@ -93,11 +93,15 @@ $tools = [
     new GetContentTerms($wpService, $validationService),
 ];
 
+// Build server info description with capabilities
+$capabilities = [
+    'safe_mode' => defined('WP_MCP_SAFE_MODE') ? WP_MCP_SAFE_MODE : false
+];
+$description = 'WordPress MCP Server (Stdio) - Capabilities: ' . json_encode($capabilities);
+
 // Create the MCP server
 $serverBuilder = Server::builder()
-    ->setServerInfo('WordPress MCP Server (Stdio)', '1.0.0', [
-        'safe_mode' => defined('WP_MCP_SAFE_MODE') ? WP_MCP_SAFE_MODE : false
-    ]);
+    ->setServerInfo('WordPress MCP Server (Stdio)', '1.0.0', $description);
 
 // Register all tools with dynamic parameter handling
 foreach ($tools as $tool) {

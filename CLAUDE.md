@@ -72,11 +72,12 @@ The project supports two transport methods:
 - MAMP (for HTTP transport)
 
 **Configuration:**
-WordPress path and safe mode are configured in `config.php` (copy from `config.example.php`):
+WordPress path, safe mode, and authentication are configured in `config.php` (copy from `config.example.php`):
 ```php
 return [
     'wordpress_path' => 'wp/wp-load.php',  // Adjust to your WordPress location
     'safe_mode' => false,  // Set to true to block delete operations
+    'bearer_token' => null,  // Set to enable authentication (null = disabled)
 ];
 ```
 
@@ -124,6 +125,124 @@ npx @modelcontextprotocol/inspector --cli http://mcp-server-http-2/index.php --t
 
 # Should return error: "Operation blocked: Safe mode is enabled..."
 ```
+
+### Authentication
+
+**What is Authentication:**
+Optional bearer token authentication for the HTTP transport (index.php). When enabled, all HTTP requests must include a valid bearer token to access the MCP server.
+
+**How It Works:**
+- **Authentication disabled** (default): Set `bearer_token` to `null` or empty string - no authentication required
+- **Authentication enabled**: Set `bearer_token` to a secure random string - all requests must include valid token
+
+**Implementation:**
+1. **Token Generation** (`bin/generate-token.php`):
+   - Generates cryptographically secure random tokens
+   - Provides configuration examples for Claude Desktop and MCP inspector
+   - Displays setup instructions
+
+2. **Configuration** (`config.php`):
+   - Set `bearer_token` to generated token value
+   - Leave as `null` to disable authentication
+
+3. **Token Validation** (`src/Auth/BearerTokenAuth.php`):
+   - Validates `Authorization: Bearer <token>` header
+   - Also accepts `X-MCP-API-Key: <token>` as fallback
+   - Returns MCP-compliant 401 responses with `WWW-Authenticate` header
+
+4. **Server Integration** (`index.php`):
+   - Authentication check runs before WordPress loads
+   - Server metadata includes `authentication_enabled` status
+   - Exits early with 401 if authentication fails
+
+**Generating a Token:**
+```bash
+# Generate a secure token
+php bin/generate-token.php
+
+# Generate with custom length
+php bin/generate-token.php --length 48
+
+# Show help
+php bin/generate-token.php --help
+```
+
+**Configuration Examples:**
+
+**Local Development (No Authentication):**
+```php
+// config.php
+return [
+    'wordpress_path' => 'wp/wp-load.php',
+    'bearer_token' => null,  // Authentication disabled
+];
+```
+
+**Production (With Authentication):**
+```php
+// config.php
+return [
+    'wordpress_path' => 'wp/wp-load.php',
+    'bearer_token' => 'your-generated-token-here',  // Authentication enabled
+];
+```
+
+**Claude Desktop Integration (with authentication):**
+```json
+{
+  "mcpServers": {
+    "php-wordpress-http": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://your-site.com/mcp/index.php",
+        "--header",
+        "Authorization:${MCP_TOKEN}"
+      ],
+      "env": {
+        "MCP_TOKEN": "Bearer your-generated-token-here"
+      }
+    }
+  }
+}
+```
+
+**Note:** Remove spaces around colons in header values due to a bug in Cursor/Claude Desktop Windows that mangles header values with spaces.
+
+**Testing with MCP Inspector:**
+
+**Without Authentication:**
+```bash
+npx @modelcontextprotocol/inspector \
+  --cli http://mcp-server-http-2/index.php \
+  --transport http \
+  --method tools/list
+```
+
+**With Authentication:**
+```bash
+# Set token in environment
+export MCP_BEARER_TOKEN="your-generated-token-here"
+
+# Run tests with authentication
+./tests/inspector-tests.sh
+
+# Or use inspector directly
+npx @modelcontextprotocol/inspector \
+  --cli http://mcp-server-http-2/index.php \
+  --transport http \
+  --header "Authorization: Bearer your-generated-token-here" \
+  --method tools/list
+```
+
+**Security Best Practices:**
+- **Always use HTTPS** in production (never plain HTTP)
+- Store tokens in environment variables or secure vaults
+- Never commit `config.php` with real tokens to version control
+- Rotate tokens periodically (generate new token, update config)
+- Use different tokens for different environments (dev/staging/production)
+- Token length: minimum 32 bytes (43 characters base64), recommended 48+ bytes
+- Monitor for unauthorized access attempts in logs
 
 **Claude Desktop Integration (Stdio):**
 Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:

@@ -61,4 +61,57 @@ return [
      * DEFAULT: false (all operations allowed)
      */
     'safe_mode' => false,  // Set to true to enable safe mode and block delete operations
+
+    /**
+     * Bearer Token Authentication (HTTP Transport Only)
+     *
+     * Optional bearer token authentication for the HTTP transport (index.php).
+     * This provides security for the MCP server when exposed over HTTP.
+     *
+     * How it works:
+     * - If bearer_token is empty/null: Authentication is DISABLED (open access)
+     * - If bearer_token is set: Authentication is REQUIRED
+     *
+     * When enabled, clients must include the token in one of these headers:
+     * - Authorization: Bearer <your-token>
+     * - X-MCP-API-Key: <your-token>
+     *
+     * Token format:
+     * - Use cryptographically secure random strings (64+ characters recommended)
+     * - Generate tokens using: php bin/generate-token.php
+     * - Or use: openssl rand -base64 48
+     *
+     * Claude Desktop configuration example (when authentication is enabled):
+     * {
+     *   "mcpServers": {
+     *     "wordpress": {
+     *       "command": "npx",
+     *       "args": [
+     *         "mcp-remote",
+     *         "https://your-site.com/mcp/index.php",
+     *         "--header",
+     *         "Authorization:${MCP_TOKEN}"
+     *       ],
+     *       "env": {
+     *         "MCP_TOKEN": "Bearer your-secret-token-here"
+     *       }
+     *     }
+     *   }
+     * }
+     *
+     * Security recommendations:
+     * - ALWAYS use HTTPS in production (never HTTP)
+     * - Store tokens in environment variables or secure vaults
+     * - Rotate tokens periodically
+     * - Use different tokens for different environments
+     * - Never commit config.php with real tokens to version control
+     *
+     * Use cases:
+     * - Local development: Leave empty for no authentication
+     * - Staging/Production: Set a strong token for security
+     * - Shared hosting: Required to prevent unauthorized access
+     *
+     * DEFAULT: null (authentication disabled)
+     */
+    'bearer_token' => null,  // Set to a secure random string to enable authentication
 ];

@@ -6,7 +6,15 @@
 set -e  # Exit on error
 
 SERVER_URL="http://mcp-server-http-2/index.php"
-INSPECTOR="npx @modelcontextprotocol/inspector --cli $SERVER_URL --transport http"
+
+# Check if bearer token is set in environment
+if [ -n "$MCP_BEARER_TOKEN" ]; then
+    echo "Using bearer token authentication"
+    INSPECTOR="npx @modelcontextprotocol/inspector --cli $SERVER_URL --transport http --header \"Authorization: Bearer $MCP_BEARER_TOKEN\""
+else
+    echo "No authentication (set MCP_BEARER_TOKEN environment variable to test with auth)"
+    INSPECTOR="npx @modelcontextprotocol/inspector --cli $SERVER_URL --transport http"
+fi
 
 # Colors for output
 GREEN='\033[0;32m'
