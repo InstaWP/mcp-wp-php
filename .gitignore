@@ -1,0 +1,45 @@
+# Dependencies
+vendor/
+node_modules/
+sessions
+
+# Composer
+composer.phar
+
+# Sessions
+/sessions/*
+!/sessions/.gitkeep
+
+# Logs
+*.log
+php-errors.log
+
+# WordPress (if included in development)
+/wp/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.phpunit.result.cache
+
+# Environment
+.env
+.env.local
+.htaccess
+package-lock.json
+.phpunit.cache
+.claude
+composer.lock
+config.php
+
+# 3rd party repos
+php-sdk
