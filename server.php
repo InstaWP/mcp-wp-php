@@ -95,7 +95,9 @@ $tools = [
 
 // Create the MCP server
 $serverBuilder = Server::builder()
-    ->setServerInfo('WordPress MCP Server (Stdio)', '1.0.0');
+    ->setServerInfo('WordPress MCP Server (Stdio)', '1.0.0', [
+        'safe_mode' => defined('WP_MCP_SAFE_MODE') ? WP_MCP_SAFE_MODE : false
+    ]);
 
 // Register all tools with dynamic parameter handling
 foreach ($tools as $tool) {

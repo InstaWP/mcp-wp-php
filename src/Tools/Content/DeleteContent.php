@@ -54,6 +54,9 @@ class DeleteContent extends AbstractTool
      */
     protected function doExecute(array $parameters): array
     {
+        // Check if safe mode is enabled
+        $this->checkSafeMode('Deleting content');
+
         $contentId = $parameters['content_id'];
         $forceDelete = $parameters['force_delete'] ?? false;
 

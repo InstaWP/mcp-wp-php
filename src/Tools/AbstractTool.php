@@ -179,4 +179,20 @@ abstract class AbstractTool implements ToolInterface
             'errors' => $errors,
         ];
     }
+
+    /**
+     * Check if safe mode is enabled and throw exception if operation is not allowed
+     *
+     * This method should be called by tools that perform destructive operations
+     * (like deletions) to ensure they respect the safe mode setting.
+     *
+     * @param string $operation Description of the operation being attempted
+     * @throws ToolException If safe mode is enabled
+     */
+    protected function checkSafeMode(string $operation = 'this operation'): void
+    {
+        if (defined('WP_MCP_SAFE_MODE') && WP_MCP_SAFE_MODE === true) {
+            throw ToolException::safeModeViolation($operation);
+        }
+    }
 }

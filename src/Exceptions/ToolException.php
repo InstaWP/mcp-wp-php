@@ -36,6 +36,21 @@ class ToolException extends \Exception
     }
 
     /**
+     * Create a safe mode violation exception
+     *
+     * @param string $operation The operation that was blocked
+     * @return self
+     */
+    public static function safeModeViolation(string $operation): self
+    {
+        $exception = new self(
+            "Operation blocked: Safe mode is enabled. {$operation} is not allowed."
+        );
+        $exception->errors = ['safe_mode' => 'enabled'];
+        return $exception;
+    }
+
+    /**
      * Validation errors (if any)
      *
      * @var array<string, mixed>

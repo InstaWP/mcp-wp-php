@@ -240,4 +240,31 @@ class DeleteContentTest extends TestCase
 
         $this->tool->execute($parameters);
     }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function testExecuteBlockedBySafeMode(): void
+    {
+        // Define the safe mode constant
+        define('WP_MCP_SAFE_MODE', true);
+
+        // Re-create the tool in this separate process
+        $this->wp = Mockery::mock(WordPressService::class);
+        $this->validator = new ValidationService();
+        $this->tool = new DeleteContent($this->wp, $this->validator);
+
+        $parameters = [
+            'content_id' => 123
+        ];
+
+        // Safe mode check happens before WordPress interactions,
+        // so we don't need to mock any WP methods
+
+        $this->expectException(ToolException::class);
+        $this->expectExceptionMessage('Operation blocked: Safe mode is enabled. Deleting content is not allowed.');
+
+        $this->tool->execute($parameters);
+    }
 }

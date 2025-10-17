@@ -33,4 +33,32 @@ return [
      * REQUIRED: This path must be set for the server to start.
      */
     'wordpress_path' => '../wp-load.php',  // Change this to your WordPress path
+
+    /**
+     * Safe Mode
+     *
+     * When enabled, safe mode prevents destructive operations from being executed.
+     *
+     * Blocked operations when safe_mode is true:
+     * - delete_content: Deleting posts, pages, and other content
+     * - delete_term: Deleting categories, tags, and other taxonomy terms
+     *
+     * Allowed operations (read and write):
+     * - All list/get/discover operations (read-only)
+     * - create_content, update_content (write operations)
+     * - create_term, update_term (write operations)
+     * - assign_terms_to_content (write operations)
+     *
+     * Use cases:
+     * - Production environments where accidental deletions must be prevented
+     * - Read-only or limited-write access for untrusted clients
+     * - Shared environments where delete permissions should be restricted
+     * - Testing and development where data preservation is important
+     *
+     * When an operation is blocked, the tool will return an error message
+     * indicating that safe mode is enabled.
+     *
+     * DEFAULT: false (all operations allowed)
+     */
+    'safe_mode' => false,  // Set to true to enable safe mode and block delete operations
 ];

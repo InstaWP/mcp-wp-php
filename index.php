@@ -98,7 +98,9 @@ $request = $creator->fromGlobals();
 
 // Create the MCP server
 $serverBuilder = Server::builder()
-    ->setServerInfo('WordPress MCP Server', '1.0.0')
+    ->setServerInfo('WordPress MCP Server', '1.0.0', [
+        'safe_mode' => defined('WP_MCP_SAFE_MODE') ? WP_MCP_SAFE_MODE : false
+    ])
     ->setSession(new FileSessionStore(__DIR__ . '/sessions'));
 
 // Register all tools with dynamic parameter handling

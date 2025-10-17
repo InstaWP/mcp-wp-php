@@ -72,11 +72,57 @@ The project supports two transport methods:
 - MAMP (for HTTP transport)
 
 **Configuration:**
-WordPress path is configured in `config.php` (copy from `config.example.php`):
+WordPress path and safe mode are configured in `config.php` (copy from `config.example.php`):
 ```php
 return [
     'wordpress_path' => 'wp/wp-load.php',  // Adjust to your WordPress location
+    'safe_mode' => false,  // Set to true to block delete operations
 ];
+```
+
+### Safe Mode
+
+**What is Safe Mode:**
+Safe mode is a configuration option that prevents destructive delete operations from being executed. When enabled, the tools `delete_content` and `delete_term` will throw exceptions with clear error messages.
+
+**Implementation:**
+1. **Configuration Loading** (`load-wordpress.php`):
+   - Reads `safe_mode` from `config.php` (defaults to false)
+   - Defines global constant `WP_MCP_SAFE_MODE`
+
+2. **Safe Mode Check** (`AbstractTool.php`):
+   - Provides `checkSafeMode()` method that tools can call
+   - Throws `ToolException::safeModeViolation()` if safe mode is enabled
+
+3. **Tool Integration**:
+   - Delete tools (`DeleteContent`, `DeleteTerm`) call `$this->checkSafeMode('Operation description')` at the start of `doExecute()`
+   - Exception is caught by AbstractTool's execute() method and returned as error response
+
+4. **Server Metadata**:
+   - Safe mode status is included in server info for transparency
+   - Both `index.php` and `server.php` expose safe_mode in capabilities
+
+**Adding Safe Mode to New Tools:**
+If you create new tools that perform destructive operations:
+```php
+protected function doExecute(array $parameters): array
+{
+    // Check if safe mode blocks this operation
+    $this->checkSafeMode('Description of operation being blocked');
+
+    // Rest of your tool implementation...
+}
+```
+
+**Testing with Safe Mode:**
+```bash
+# Edit config.php to enable safe mode
+'safe_mode' => true,
+
+# Try a delete operation
+npx @modelcontextprotocol/inspector --cli http://mcp-server-http-2/index.php --transport http --method tools/call --tool-name delete_content --tool-arg content_id=123
+
+# Should return error: "Operation blocked: Safe mode is enabled..."
 ```
 
 **Claude Desktop Integration (Stdio):**

@@ -54,6 +54,14 @@ if (!isset($config['wordpress_path']) || empty($config['wordpress_path'])) {
     }
 }
 
+// Load safe mode setting (default to false if not set)
+$safeMode = isset($config['safe_mode']) ? (bool)$config['safe_mode'] : false;
+
+// Define global constant for safe mode access
+if (!defined('WP_MCP_SAFE_MODE')) {
+    define('WP_MCP_SAFE_MODE', $safeMode);
+}
+
 // Resolve the WordPress path (handle relative paths)
 $wpLoadPath = $config['wordpress_path'];
 

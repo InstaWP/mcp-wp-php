@@ -54,6 +54,9 @@ class DeleteTerm extends AbstractTool
      */
     protected function doExecute(array $parameters): array
     {
+        // Check if safe mode is enabled
+        $this->checkSafeMode('Deleting terms');
+
         $termId = $parameters['term_id'];
         $taxonomy = $parameters['taxonomy'];
 

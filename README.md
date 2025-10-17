@@ -91,6 +91,34 @@ The MCP server needs to know where your WordPress installation is located.
 
 **Important:** The `config.php` file is git-ignored and specific to your installation. Never commit it to version control.
 
+### Step 3.5: (Optional) Enable Safe Mode
+
+Safe mode prevents destructive delete operations, providing an extra layer of protection for your WordPress content.
+
+**What Safe Mode Does:**
+- **Blocks**: `delete_content` and `delete_term` operations
+- **Allows**: All read operations and write operations (create, update)
+
+**When to Enable Safe Mode:**
+- Production environments where accidental deletions must be prevented
+- Shared environments with multiple users
+- Read-mostly or limited-write access scenarios
+- Testing and development where data preservation is important
+
+**To Enable Safe Mode:**
+
+Edit `config.php` and set:
+```php
+'safe_mode' => true,
+```
+
+When a delete operation is attempted with safe mode enabled, the tool will return an error message:
+```
+Operation blocked: Safe mode is enabled. Deleting content is not allowed.
+```
+
+**Default**: Safe mode is **OFF** (false), allowing all operations including deletions.
+
 ### Step 4: Verify Access
 
 Make sure your web server (Apache/Nginx) can access the `mcp-server` directory.
