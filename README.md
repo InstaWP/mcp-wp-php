@@ -59,14 +59,46 @@ Open terminal in the `mcp-server` directory and run:
 composer install --no-dev
 ```
 
-### Step 3: Verify Access
+### Step 3: Configure WordPress Path
+
+The MCP server needs to know where your WordPress installation is located.
+
+1. **Copy the configuration template:**
+   ```bash
+   cp config.example.php config.php
+   ```
+
+2. **Edit `config.php`** and set the `wordpress_path` to your WordPress installation:
+
+   **If MCP server is in WordPress root subdirectory** (recommended):
+   ```php
+   'wordpress_path' => '../wp-load.php',
+   ```
+
+   **If WordPress is in a subdirectory** (development):
+   ```php
+   'wordpress_path' => 'wp/wp-load.php',
+   ```
+
+   **Using absolute path**:
+   ```php
+   // Linux/macOS
+   'wordpress_path' => '/var/www/html/wp-load.php',
+
+   // Windows (use forward slashes)
+   'wordpress_path' => 'C:/xampp/htdocs/mysite/wp-load.php',
+   ```
+
+**Important:** The `config.php` file is git-ignored and specific to your installation. Never commit it to version control.
+
+### Step 4: Verify Access
 
 Make sure your web server (Apache/Nginx) can access the `mcp-server` directory.
 
 **Access URL:**
 The server will be accessible at: `https://your-site.com/mcp-server/index.php`
 
-### Step 4: Test the Server
+### Step 5: Test the Server
 
 Visit `https://your-site.com/mcp-server/index.php` in your browser. You should see a JSON response indicating the MCP server is running.
 
@@ -231,9 +263,9 @@ chmod -R 777 mcp-server/sessions/
 
 ### Tools not working
 
-1. **Update WordPress path:** Edit `index.php` line ~53 and update the WordPress path if needed:
+1. **Check WordPress path:** Verify that `config.php` has the correct path to your WordPress installation:
    ```php
-   require_once __DIR__ . '/../wp-load.php';
+   'wordpress_path' => '../wp-load.php',  // Update this path
    ```
 
 2. **Clear sessions:**
