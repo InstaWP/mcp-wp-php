@@ -1,4 +1,4 @@
-# WordPress MCP Server
+# WordPress MCP Server (using PHP SDK)
 
 A professional WordPress MCP (Model Context Protocol) server that enables AI assistants like Claude to interact with your WordPress site through a standardized protocol.
 
@@ -72,13 +72,18 @@ Visit `https://your-site.com/mcp-server/index.php` in your browser. You should s
 
 ## Claude Desktop Integration
 
-### Install mcp-remote
+This server supports two connection methods:
 
+### Option 1: HTTP Transport (Recommended for Remote Sites)
+
+Use this method when connecting to a remote WordPress site via HTTP/HTTPS.
+
+**Install mcp-remote (optional, Claude Desktop can do this itself):**
 ```bash
 npm install -g mcp-remote
 ```
 
-### Configure Claude Desktop
+**Configure Claude Desktop:**
 
 Add to your Claude Desktop config file:
 
@@ -116,6 +121,58 @@ For local development (HTTP without SSL):
   }
 }
 ```
+
+### Option 2: Stdio Transport (Recommended for Local Sites)
+
+Use this method when running WordPress locally on the same machine as Claude Desktop. This is faster and doesn't require HTTP.
+
+**Configure Claude Desktop:**
+
+```json
+{
+  "mcpServers": {
+    "wordpress": {
+      "command": "php",
+      "args": [
+        "/absolute/path/to/your-wordpress-site/mcp-server/server.php"
+      ]
+    }
+  }
+}
+```
+
+**Example for macOS/Linux:**
+```json
+{
+  "mcpServers": {
+    "wordpress": {
+      "command": "php",
+      "args": [
+        "/Users/yourname/Sites/mywordpress/mcp-server/server.php"
+      ]
+    }
+  }
+}
+```
+
+**Example for Windows:**
+```json
+{
+  "mcpServers": {
+    "wordpress": {
+      "command": "php",
+      "args": [
+        "C:\\xampp\\htdocs\\mywordpress\\mcp-server\\server.php"
+      ]
+    }
+  }
+}
+```
+
+**Note:**
+- Make sure `php` is in your system PATH
+- Use the absolute path to `server.php`
+- Stdio transport doesn't require a web server to be running
 
 ### Restart Claude Desktop
 
